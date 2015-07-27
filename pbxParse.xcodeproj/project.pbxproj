@@ -8,23 +8,29 @@
 
 /* Begin PBXBuildFile section */
 		5002AD771B43781C003CC7A5 /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5002AD761B43781C003CC7A5 /* main.swift */; };
+		5002AD821B437D23003CC7A5 /* test2.pbxproj in CopyFiles */ = {isa = PBXBuildFile; fileRef = 5002AD7D1B437C6A003CC7A5 /* test2.pbxproj */; };
+		5002AD831B437D23003CC7A5 /* testProj.pbxproj in CopyFiles */ = {isa = PBXBuildFile; fileRef = 5002AD7E1B437C6A003CC7A5 /* testProj.pbxproj */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
-		5002AD711B43781C003CC7A5 /* CopyFiles */ = {
+		5002AD811B437D0B003CC7A5 /* CopyFiles */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
-			dstPath = /usr/share/man/man1/;
-			dstSubfolderSpec = 0;
+			dstPath = "";
+			dstSubfolderSpec = 16;
 			files = (
+				5002AD821B437D23003CC7A5 /* test2.pbxproj in CopyFiles */,
+				5002AD831B437D23003CC7A5 /* testProj.pbxproj in CopyFiles */,
 			);
-			runOnlyForDeploymentPostprocessing = 1;
+			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
 		5002AD731B43781C003CC7A5 /* pbxParse */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = pbxParse; sourceTree = BUILT_PRODUCTS_DIR; };
 		5002AD761B43781C003CC7A5 /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
+		5002AD7D1B437C6A003CC7A5 /* test2.pbxproj */ = {isa = PBXFileReference; lastKnownFileType = text.pbxproject; path = test2.pbxproj; sourceTree = "<group>"; };
+		5002AD7E1B437C6A003CC7A5 /* testProj.pbxproj */ = {isa = PBXFileReference; lastKnownFileType = text.pbxproject; path = testProj.pbxproj; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -57,6 +63,8 @@
 		5002AD751B43781C003CC7A5 /* pbxParse */ = {
 			isa = PBXGroup;
 			children = (
+				5002AD7D1B437C6A003CC7A5 /* test2.pbxproj */,
+				5002AD7E1B437C6A003CC7A5 /* testProj.pbxproj */,
 				5002AD761B43781C003CC7A5 /* main.swift */,
 			);
 			path = pbxParse;
@@ -71,7 +79,7 @@
 			buildPhases = (
 				5002AD6F1B43781C003CC7A5 /* Sources */,
 				5002AD701B43781C003CC7A5 /* Frameworks */,
-				5002AD711B43781C003CC7A5 /* CopyFiles */,
+				5002AD811B437D0B003CC7A5 /* CopyFiles */,
 			);
 			buildRules = (
 			);

@@ -1,0 +1,15 @@
+// !$*UTF8*$!
+{
+	files = (
+		8226E19716EFBFFA00FB6107 /* QuartzCore.framework in Frameworks */,
+		8281D007169C7CC400C8BFF5 /* CoreImage.framework in Frameworks */,
+		50C189C915BE3E74005EAFB7 /* CoreData.framework in Frameworks */,
+		504F06281586E09B00812C54 /* CoreAudio.framework in Frameworks */,
+		50F5A84A156C9209007CAC0C /* CoreMedia.framework in Frameworks */,
+		50F5A848156C91FF007CAC0C /* AVFoundation.framework in Frameworks */,
+		50F5A827156B268B007CAC0C /* UIKit.framework in Frameworks */,
+		50F5A829156B268B007CAC0C /* Foundation.framework in Frameworks */,
+		50F5A82B156B268B007CAC0C /* CoreGraphics.framework in Frameworks */,
+		827D3C22171D8DC7000521F1 /* HockeySDK.framework in Frameworks */,
+	);
+}
