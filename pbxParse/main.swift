@@ -18,8 +18,8 @@ extension NSRange {
     }
 }
 
-protocol TokenType {
-}
+/// The base protocol for a scanned token, usually an enumerated type.
+protocol TokenType {}
 
 /// A basic lexical scanner, capable of producing tokens for the initialized regular expressions.
 class Scanner {
