@@ -8,42 +8,83 @@
 
 import Foundation
 
+protocol TokenType {
+}
+
 // Producer of Token objects.
-class Scanner<TokenType> {
+class Scanner {
     private let tokenDefs: [(TokenType, NSRegularExpression)]
     
     init(tokenTypes: [(TokenType, String)]) {
-        var tokenDefBuilder = [(TokenType, NSRegularExpression)]()
         
-        do {
-            // TODO: map??
-            for (type, regexStr) in tokenTypes {
-                
-                let regex = try NSRegularExpression(
-                    pattern: regexStr,
+        self.tokenDefs = tokenTypes.map { (token) -> (TokenType, NSRegularExpression) in
+            var regex = NSRegularExpression()
+            do {
+                let newRegex = try NSRegularExpression(
+                    pattern: token.1,
                     options: NSRegularExpressionOptions(rawValue: 0))
-            
-                tokenDefBuilder.append((type, regex))
+
+                regex = newRegex
             }
+            catch {
+                // TODO ???
+            }
+
+            return (token.0, regex)
         }
-        catch {
-            // TODO: Dump this and re-throw, somehow working in the assignment?
-            print("test...")
-        }
-        
-        tokenDefs = tokenDefBuilder
     }
     
     // Produce a new token.
-//    func scanNext(stream: ScannerStream) -> (TokenType, String, NSRange) {
-//        return (TokenType(), "Nope!", NSRange(0, 0))
-//    }
+    func scan(content: String, range: NSRange) -> (TokenType, String, NSRange)? {
+        var tokenOut : (TokenType, String, NSRange)? = nil
+        
+        for tokenDef in tokenDefs {
+            let tokenRegex = tokenDef.1
+            
+            let options = NSMatchingOptions.Anchored
+            let matchedRange = tokenRegex.rangeOfFirstMatchInString(content, options: options, range: range)
+            
+            if (matchedRange.location != NSNotFound) {
+                // NSRange -> Range<String.Index> coercion.
+                let newRange = Range<String.Index>(
+                    start: content.startIndex.advancedBy(matchedRange.location),
+                    end: content.startIndex.advancedBy(matchedRange.location + matchedRange.length))
+                
+                let matchedString = content.substringWithRange(newRange)
+                tokenOut = (tokenDef.0, matchedString, matchedRange)
+                break
+            }
+        }
+    
+        print("\(tokenOut)")
+        return tokenOut
+    }
 }
 
+
+
 class ScannerStream {
+    enum ScannerStreamState { // Sad trombone that this isn't part of the class
+        case Scanning(Int)
+        case End
+    }
     
-    init(contents: String) {
-        
+    let contents: String
+    let scanner: Scanner
+    var state = ScannerStreamState.Scanning(0)
+    
+    required init(contents contentsVal: String, scanner scannerVal: Scanner) {
+        contents = contentsVal
+        scanner = scannerVal
+    }
+
+//    func next() -> (TokenType, String, NSRange) {
+//        let index = -1
+//        switch
+//    }
+
+    func peek() -> (TokenType, String, NSRange)? {
+        return scanner.scan(content, range: NSRange(location: 0, length: 0))
     }
 }
 
@@ -58,7 +99,7 @@ func readFile(filePath: String) -> String {
     return fileDataStr
 }
 
-enum SomeToken : Int {
+enum SomeToken : TokenType {
     case Comment
     case Quote
     case OpenBracket
@@ -74,32 +115,32 @@ enum SomeToken : Int {
 
 func tokenize(content: String) throws {
     
-    let tokens : [(SomeToken, String)] = [
-        (.Comment, "\\/\\/.*?\\n|\\/\\*.*?\\*\\/"),
-        (.Quote, "\".*\""),
-        (.OpenBracket, "\\{"),
-        (.CloseBracket, "\\}"),
-        (.Equal, "="),
-        (.Terminator, ";"),
-        (.Separator, ","),
-        (.ArrayStart, "\\("),
-        (.ArrayEnd, "\\)"),
-        (.Ident, "[a-z|A-Z|0-9|_|\\!|\\$|\\*|~|.|\\-|\\@|\\/]+|\".*?\""),
-        (.WhiteSpace, "\\s+")
+    let tokens : [(TokenType, String)] = [
+        (SomeToken.Comment, "\\/\\/.*?\\n|\\/\\*.*?\\*\\/"),
+        (SomeToken.Quote, "\".*\""),
+        (SomeToken.OpenBracket, "\\{"),
+        (SomeToken.CloseBracket, "\\}"),
+        (SomeToken.Equal, "="),
+        (SomeToken.Terminator, ";"),
+        (SomeToken.Separator, ","),
+        (SomeToken.ArrayStart, "\\("),
+        (SomeToken.ArrayEnd, "\\)"),
+        (SomeToken.Ident, "[a-z|A-Z|0-9|_|\\!|\\$|\\*|~|.|\\-|\\@|\\/]+|\".*?\""), // TODO ???
+        (SomeToken.WhiteSpace, "\\s+")
     ]
     
-    let scanner = Scanner<SomeToken>(tokenTypes: tokens)
+    let scanner = Scanner(tokenTypes: tokens)
+
+    let testStr = "blah"
+    scanner.scan(testStr, range: NSRange(location: 0, length: testStr.characters.count))
     print("\(scanner)")
-    
-//    let testStatement = "/* test */"
-//    let matchCount = regex.numberOfMatchesInString(content,
-//        options: NSMatchingOptions(),
-//        range: NSRange(location: 0, length: content.characters.count))
-//    
-//    print("\(matchCount)")
 }
 
 let content = readFile("test2.pbxproj")
+//let stream = ScannerStream(contents: content)
+
+//print("\(stringIndex)")
+
 try tokenize(content)
 print("\(content)")
 
