@@ -1,14 +1,7 @@
-//
-//  main.swift
-//  pbxParse
-//
-//  Created by Anthony Pardee on 6/30/15.
-//  Copyright © 2015 Anthony Pardee. All rights reserved.
-//
-
 import Foundation
 
 extension NSRange {
+
     /// Produce a string index range from the NSRange instance.
     func stringIndexRange() -> Range<String.Index> {
         return Range<String.Index>(
@@ -26,26 +19,28 @@ extension String {
 }
 
 /// The base protocol for a scanned token, usually an enumerated type.
-protocol TokenType {}
+protocol ScannerTokenType : Equatable {}
+
+/// A token scanned by the scanner.
+struct ScannedToken<T : ScannerTokenType> {
+    let tokenType : T
+    let value : String
+    let range : NSRange
+}
 
 /// A basic lexical scanner, capable of producing tokens for the initialized regular expressions.
-class Scanner {
+class Scanner<T : ScannerTokenType> {
     
-    enum ScannedToken {
-        case Token(TokenType, String, NSRange)
-        case End
-    }
-    
-    private let tokenDefs: [(TokenType, NSRegularExpression)]
+    private let tokenDefs: [(T, NSRegularExpression)]
     
     /**
         Produces the first available token from the content passed, at the specified range.
         
         :param: tokenTypes The full content to produce tokens. Order implies priority.
     */
-    init(tokenTypes: [(TokenType, String)]) {
+    init(tokenTypes: [(T, String)]) {
         
-        self.tokenDefs = tokenTypes.map { (token) -> (TokenType, NSRegularExpression) in
+        self.tokenDefs = tokenTypes.map { (token) -> (T, NSRegularExpression) in
             var regex = NSRegularExpression()
             do {
                 let newRegex = try NSRegularExpression(
@@ -71,8 +66,8 @@ class Scanner {
     
         :returns: The token produced from the range passed.
     */
-    func scan(content: String, range: NSRange) -> ScannedToken {
-        var scanned : (TokenType, String, NSRange)? = nil
+    func scanNext(content: String, range: NSRange) -> ScannedToken<T>? {
+        var scanned : (T, String, NSRange)? = nil
         let options = NSMatchingOptions.Anchored
         
         for tokenDef in tokenDefs {
@@ -88,36 +83,37 @@ class Scanner {
             }
         }
         
-        var tokenOut = ScannedToken.End
+        var tokenOut : ScannedToken<T>? = nil
         if let finalToken = scanned {
-            tokenOut = ScannedToken.Token(finalToken.0, finalToken.1, finalToken.2)
+            tokenOut = ScannedToken(tokenType: finalToken.0, value: finalToken.1, range: finalToken.2)
         }
         return tokenOut
     }
 }
 
+internal enum ScannerStreamState {
+    case Scanning(Int)
+    case Finished
+}
+
 /// A stateful stream of tokens from a set of source content.
-class ScannerStream {
-    enum State {
-        case Scanning(Int)
-        case Finished
-    }
+class ScannerStream<T : ScannerTokenType> {
     
     private var content: String
-    private let scanner: Scanner
+    private let scanner: Scanner<T>
     
     private var contentLength: Int = 0
     
     /// The current state of
-    var state = State.Scanning(0)
+    var state = ScannerStreamState.Scanning(0)
     
-    required init(content contentsVal: String, scanner scannerVal: Scanner) {
+    required init(content contentsVal: String, scanner scannerVal: Scanner<T>) {
         content = contentsVal
         contentLength = contentsVal.length()
         scanner = scannerVal
         
         if content.length() == 0 {
-            state = State.Finished
+            state = ScannerStreamState.Finished
         }
     }
     
@@ -133,32 +129,36 @@ class ScannerStream {
         return finished
     }
     
-    func next() -> Scanner.ScannedToken {
-        let token = peek()
-        switch token {
-        case .Token(_, _, let range):
-            let newStart = range.location + range.length
-            if newStart >= contentLength {
-                state = .Finished
-            }
-            else {
-                state = .Scanning(newStart)
-            }
-        case .End:
-            state = .Finished
-        }
+    func next() -> ScannedToken<T>? {
+        let tokenOut = peek()
         
-        return token
+        var newState = ScannerStreamState.Finished
+        if let token = tokenOut {
+            let newStart = token.range.location + token.range.length
+            if newStart < contentLength {
+                newState = .Scanning(newStart)
+            }
+        }
+        state = newState
+        
+        return tokenOut
+    }
+    
+    func nextOfType(expected : T) -> ScannedToken<T>? {
+        guard let nextToken = peek() where
+            nextToken.tokenType == expected else { return nil }
+        
+        return next()
     }
 
-    func peek() -> Scanner.ScannedToken {
-        var tokenOut : Scanner.ScannedToken!
+    func peek() -> ScannedToken<T>? {
+        var tokenOut : ScannedToken<T>? = nil
         switch (state) {
         case .Scanning(let position):
             let scanRange = NSRange(location: position, length: contentLength - position)
-            tokenOut = scanner.scan(content, range: scanRange)
-        case .Finished:
-            tokenOut = .End
+            tokenOut = scanner.scanNext(content, range: scanRange)
+        default:
+            break
         }
         return tokenOut
     }
@@ -166,10 +166,9 @@ class ScannerStream {
 
 ///////////////////////////////////////////////////////////////////////////////////
 
-// TODO: Guard against encoding that isn't UTF8
-// TODO: THROWS!
+// TODO: Guard against encoding that isn't UTF8 - THROWS!
 func readFile(filePath: String) -> String {
-    guard let fileData = NSData(contentsOfFile: "testProj.pbxproj"),
+    guard let fileData = NSData(contentsOfFile: "test2.pbxproj"),
         fileDataStr = NSString(data: fileData, encoding: NSUTF8StringEncoding) as? String else {
             return "";
     }
@@ -177,9 +176,11 @@ func readFile(filePath: String) -> String {
     return fileDataStr
 }
 
+///////////////////////////////////////////////////////////////////////////////////
+
 let content = readFile("test2.pbxproj")
 
-enum SomeToken : TokenType {
+enum SomeToken : ScannerTokenType {
     case Comment
     case Quote
     case OpenBracket
@@ -193,7 +194,7 @@ enum SomeToken : TokenType {
     case WhiteSpace
 }
 
-let tokens : [(TokenType, String)] = [
+let tokens : [(SomeToken, String)] = [
     (SomeToken.Comment, "\\/\\/.*?\\n|\\/\\*.*?\\*\\/"),
     (SomeToken.Quote, "\".*\""),
     (SomeToken.OpenBracket, "\\{"),
@@ -210,19 +211,91 @@ let tokens : [(TokenType, String)] = [
 let scanner = Scanner(tokenTypes: tokens)
 let stream = ScannerStream(content: content, scanner: scanner)
 
-
-var scannedTokens = Array<Scanner.ScannedToken>()
-
+var scannedTokens = Array<ScannedToken<SomeToken>>()
 while (!stream.finished()) {
     let token = stream.next()
-    switch (token) {
-    case .Token:
-        print("\(token)")
-    case .End:
-        print("end")
-        break
-    }
+    print("\(token)")
 }
 
-print("done...")
-print("\(stream.peek())")
+///////////////////////////////////////////////////////////////////////////////////
+
+//// !$*UTF8*$!
+//{
+//    files = (
+//        8226E19716EFBFFA00FB6107 /* QuartzCore.framework in Frameworks */,
+//        8281D007169C7CC400C8BFF5 /* CoreImage.framework in Frameworks */,
+//        50C189C915BE3E74005EAFB7 /* CoreData.framework in Frameworks */,
+//        504F06281586E09B00812C54 /* CoreAudio.framework in Frameworks */,
+//        50F5A84A156C9209007CAC0C /* CoreMedia.framework in Frameworks */,
+//        50F5A848156C91FF007CAC0C /* AVFoundation.framework in Frameworks */,
+//        50F5A827156B268B007CAC0C /* UIKit.framework in Frameworks */,
+//        50F5A829156B268B007CAC0C /* Foundation.framework in Frameworks */,
+//        50F5A82B156B268B007CAC0C /* CoreGraphics.framework in Frameworks */,
+//        827D3C22171D8DC7000521F1 /* HockeySDK.framework in Frameworks */,
+//    );
+//}
+
+
+// Object -> { ObjectEntry+ };
+// ObjectEntry -> Ident = ObjectValue
+// ObjectValue -> (Object | Array | Ident);
+// Array -> ( ObjectValue+ );
+//
+//class ParsedNode {
+//    let nodes : [ParsedNode]?
+//    
+//    required init(nodes nodeVal: [ParsedNode]) {
+//        nodes = nodeVal
+//    }
+//    
+//    class func readFromStream(stream : ScannerStream) -> ParsedNode? {
+//        return nil
+//    }
+//    
+//    func dump() -> String {
+//        return ""
+//    }
+//}
+//
+//class TokenNode : ParsedNode {
+//    override class func readFromStream(stream : ScannerStream) -> ParsedNode? {
+//        return nil
+//    }
+//}
+//
+//class CommentNode : ParsedNode {
+//    override class func readFromStream(stream : ScannerStream) -> ParsedNode? {
+//        return nil
+//    }
+//}
+//
+//class ObjectNode : ParsedNode {
+//    override class func readFromStream(stream : ScannerStream) -> ParsedNode? {
+//        return nil
+//    }
+//}
+//
+//class ObjectEntryNode : ParsedNode {
+//    override class func readFromStream(stream : ScannerStream) -> ParsedNode? {
+//        return nil
+//    }
+//}
+//
+//class ObjectValueNode : ParsedNode {
+//    override class func readFromStream(stream : ScannerStream) -> ParsedNode? {
+////        guard let paren = stream.nextOfType()
+//        
+//        return nil
+//    }
+//}
+//
+//class ArrayNode : ParsedNode {
+//    override class func readFromStream(stream : ScannerStream) -> ParsedNode? {
+//        return nil
+//    }
+//}
+//
+//let project = ObjectNode.readFromStream(stream)
+//project?.dump()
+
+///////////////////////////////////////////////////////////////////////////////////
