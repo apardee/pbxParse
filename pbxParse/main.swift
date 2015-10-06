@@ -240,29 +240,26 @@ while (!stream.finished()) {
 // ObjectEntry -> Ident = ObjectValue
 // ObjectValue -> (Object | Array | Ident);
 // Array -> ( ObjectValue+ );
-//
-//class ParsedNode {
-//    let nodes : [ParsedNode]?
+
+class ParsedNode<T : ScannerTokenType> {
+    let nodes : [ParsedNode]? = nil
+    
+    required init?(stream: ScannerStream<T>) {
+    }
+
+    func dump() -> String {
+        return String()
+    }
+}
+
+//class TokenNode<T : ScannerTokenType> : ParsedNode<T> {
+//    let token : T? = nil
 //    
-//    required init(nodes nodeVal: [ParsedNode]) {
-//        nodes = nodeVal
-//    }
-//    
-//    class func readFromStream(stream : ScannerStream) -> ParsedNode? {
-//        return nil
-//    }
-//    
-//    func dump() -> String {
-//        return ""
+//    required init?(stream: ScannerStream<T>) {
+//        super.init(stream: stream)
 //    }
 //}
-//
-//class TokenNode : ParsedNode {
-//    override class func readFromStream(stream : ScannerStream) -> ParsedNode? {
-//        return nil
-//    }
-//}
-//
+
 //class CommentNode : ParsedNode {
 //    override class func readFromStream(stream : ScannerStream) -> ParsedNode? {
 //        return nil
