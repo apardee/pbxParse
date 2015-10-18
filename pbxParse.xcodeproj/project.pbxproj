@@ -10,6 +10,7 @@
 		5002AD771B43781C003CC7A5 /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5002AD761B43781C003CC7A5 /* main.swift */; };
 		5002AD821B437D23003CC7A5 /* test2.pbxproj in CopyFiles */ = {isa = PBXBuildFile; fileRef = 5002AD7D1B437C6A003CC7A5 /* test2.pbxproj */; };
 		5002AD831B437D23003CC7A5 /* testProj.pbxproj in CopyFiles */ = {isa = PBXBuildFile; fileRef = 5002AD7E1B437C6A003CC7A5 /* testProj.pbxproj */; };
+		505C14C11BCC8DDA00AC78FF /* test3.pbxproj in CopyFiles */ = {isa = PBXBuildFile; fileRef = 505C14C01BCC8D8200AC78FF /* test3.pbxproj */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -19,6 +20,7 @@
 			dstPath = "";
 			dstSubfolderSpec = 16;
 			files = (
+				505C14C11BCC8DDA00AC78FF /* test3.pbxproj in CopyFiles */,
 				5002AD821B437D23003CC7A5 /* test2.pbxproj in CopyFiles */,
 				5002AD831B437D23003CC7A5 /* testProj.pbxproj in CopyFiles */,
 			);
@@ -31,6 +33,7 @@
 		5002AD761B43781C003CC7A5 /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
 		5002AD7D1B437C6A003CC7A5 /* test2.pbxproj */ = {isa = PBXFileReference; lastKnownFileType = text.pbxproject; path = test2.pbxproj; sourceTree = "<group>"; };
 		5002AD7E1B437C6A003CC7A5 /* testProj.pbxproj */ = {isa = PBXFileReference; lastKnownFileType = text.pbxproject; path = testProj.pbxproj; sourceTree = "<group>"; };
+		505C14C01BCC8D8200AC78FF /* test3.pbxproj */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.pbxproject; path = test3.pbxproj; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -63,6 +66,7 @@
 		5002AD751B43781C003CC7A5 /* pbxParse */ = {
 			isa = PBXGroup;
 			children = (
+				505C14C01BCC8D8200AC78FF /* test3.pbxproj */,
 				5002AD7D1B437C6A003CC7A5 /* test2.pbxproj */,
 				5002AD7E1B437C6A003CC7A5 /* testProj.pbxproj */,
 				5002AD761B43781C003CC7A5 /* main.swift */,
@@ -244,6 +248,7 @@
 				5002AD7C1B43781C003CC7A5 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};

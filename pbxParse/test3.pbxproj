@@ -1,0 +1,6 @@
+// !$*UTF8*$!
+{
+    testRef1 = file;
+    testRef2 = file.storyboard;
+    testRef3 = meh;
+}
