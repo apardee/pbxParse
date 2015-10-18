@@ -253,14 +253,12 @@ let tokens = [
 //    );
 //}
 
-class ParsedNode<T : ScannerTokenType> {
-    func dump() -> String {
-        return String()
-    }
+protocol ParsedNode {
+    func dump() -> String
 }
 
 // Wraps a token, also consumes comment and
-class TokenNode : ParsedNode<SomeToken> {
+class TokenNode : ParsedNode {
     let primaryToken : ScannedToken<SomeToken>
     let allTokens : [ScannedToken<SomeToken>]
     
@@ -290,7 +288,7 @@ class TokenNode : ParsedNode<SomeToken> {
         return TokenNode(primary: primaryToken, otherTokens: otherTokens)
     }
     
-    override func dump() -> String {
+    func dump() -> String {
         var valueString = ""
         for token in allTokens {
             valueString += token.value
@@ -300,7 +298,7 @@ class TokenNode : ParsedNode<SomeToken> {
 }
 
 /// Object -> { ObjectEntry+ };
-class ObjectNode : ParsedNode<SomeToken> {
+class ObjectNode : ParsedNode {
     let openBracket : TokenNode
     let content : [ObjectEntryNode]
     let closeBracket : TokenNode
@@ -339,7 +337,7 @@ class ObjectNode : ParsedNode<SomeToken> {
             terminator: terminator)
     }
     
-    override func dump() -> String {
+    func dump() -> String {
         var fullValue = openBracket.dump()
         for node in content {
             fullValue += node.dump()
@@ -353,7 +351,7 @@ class ObjectNode : ParsedNode<SomeToken> {
 }
 
 /// ObjectEntry -> Ident = ObjectValue
-class ObjectEntryNode : ParsedNode<SomeToken> {
+class ObjectEntryNode : ParsedNode {
     let identifier : TokenNode
     let equal : TokenNode
     let objectValue : ObjectValueNode
@@ -381,7 +379,7 @@ class ObjectEntryNode : ParsedNode<SomeToken> {
         return ObjectEntryNode(identifier: identifier, equal: equal, objectValue: objectValue, comma: comma)
     }
     
-    override func dump() -> String {
+    func dump() -> String {
         var fullValue = identifier.dump() + equal.dump() + objectValue.dump()
         if let comma = comma {
             fullValue += comma.dump()
@@ -391,17 +389,17 @@ class ObjectEntryNode : ParsedNode<SomeToken> {
 }
 
 /// ObjectValue -> (Object | Array | Ident);
-class ObjectValueNode : ParsedNode<SomeToken> {
-    let value : ParsedNode<SomeToken>
+class ObjectValueNode : ParsedNode {
+    let value : ParsedNode
     let terminator : TokenNode?
     
-    required init(value val : ParsedNode<SomeToken>, terminator termval : TokenNode?) {
+    required init(value val : ParsedNode, terminator termval : TokenNode?) {
         value = val
         terminator = termval
     }
     
     class func fromStream(stream : ScannerStream<SomeToken>) -> ObjectValueNode? {
-        var value : ParsedNode<SomeToken>? = nil
+        var value : ParsedNode? = nil
         if let nextToken = stream.peekExcluding([ .Comment, .WhiteSpace ]) {
             switch nextToken.tokenType {
             case .ArrayStart:
@@ -425,7 +423,7 @@ class ObjectValueNode : ParsedNode<SomeToken> {
         return returnVal
     }
     
-    override func dump() -> String {
+    func dump() -> String {
         var fullValue = value.dump()
         if let terminator = terminator {
             fullValue += terminator.dump()
@@ -435,7 +433,7 @@ class ObjectValueNode : ParsedNode<SomeToken> {
 }
 
 /// Array -> ( ObjectValue+ );
-class ArrayNode : ParsedNode<SomeToken> {
+class ArrayNode : ParsedNode {
     let openParen : TokenNode
     let elements : [ObjectValueNode]
     let closeParen : TokenNode
@@ -473,7 +471,7 @@ class ArrayNode : ParsedNode<SomeToken> {
             terminator: terminator)
     }
     
-    override func dump() -> String {
+    func dump() -> String {
         var fullValue = openParen.dump()
         for node in elements {
             fullValue += node.dump()
