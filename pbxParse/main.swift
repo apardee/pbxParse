@@ -254,9 +254,6 @@ let tokens = [
 //}
 
 class ParsedNode<T : ScannerTokenType> {
-    required init?(stream: ScannerStream<T>) {
-    }
-    
     func dump() -> String {
         return String()
     }
@@ -264,29 +261,33 @@ class ParsedNode<T : ScannerTokenType> {
 
 // Wraps a token, also consumes comment and
 class TokenNode : ParsedNode<SomeToken> {
-    var primaryToken : ScannedToken<SomeToken>! = nil
-    var allTokens : [ScannedToken<SomeToken>]! = [ScannedToken<SomeToken>]()
+    let primaryToken : ScannedToken<SomeToken>
+    let allTokens : [ScannedToken<SomeToken>]
     
-    required init?(stream: ScannerStream<SomeToken>, type: SomeToken) {
+    required init(primary : ScannedToken<SomeToken>, otherTokens : [ScannedToken<SomeToken>]) {
+        primaryToken = primary
+        allTokens = otherTokens
+    }
+    
+    class func fromStream(stream : ScannerStream<SomeToken>, type : SomeToken) -> TokenNode? {
         guard let next = stream.peekExcluding([ .Comment, .WhiteSpace ]) where next.tokenType == type else {
-            super.init(stream: stream)
             return nil
         }
         
+        var otherTokens = [ScannedToken<SomeToken>]()
+
         while let previewNext = stream.peek() where
             previewNext.tokenType == .Comment ||
             previewNext.tokenType == .WhiteSpace {
-                
-            allTokens.append(previewNext)
+
+            otherTokens.append(previewNext)
             stream.next()
         }
+
+        let primaryToken = stream.next()!
+        otherTokens.append(primaryToken)
         
-        if let finalToken = stream.next() {
-            primaryToken = finalToken
-            allTokens.append(finalToken)
-        }
-        
-        super.init(stream: stream)
+        return TokenNode(primary: primaryToken, otherTokens: otherTokens)
     }
     
     override func dump() -> String {
@@ -300,35 +301,42 @@ class TokenNode : ParsedNode<SomeToken> {
 
 /// Object -> { ObjectEntry+ };
 class ObjectNode : ParsedNode<SomeToken> {
-    var openBracket : TokenNode! = nil
-    var content : [ObjectEntryNode]! = nil
-    var closeBracket : TokenNode! = nil
-    var terminator : TokenNode? = nil
+    let openBracket : TokenNode
+    let content : [ObjectEntryNode]
+    let closeBracket : TokenNode
+    let terminator : TokenNode?
     
-    required init?(stream: ScannerStream<SomeToken>) {
-        let openBracket = TokenNode(stream: stream, type: .OpenBracket)
-        if openBracket == nil {
-            super.init(stream: stream)
+    required init(openBracket openBracketVal: TokenNode,
+        content contentVal : [ObjectEntryNode],
+        closeBracket closeBracketVal : TokenNode,
+        terminator terminatorVal : TokenNode?) {
+        
+        openBracket = openBracketVal
+        content = contentVal
+        closeBracket = closeBracketVal
+        terminator = terminatorVal
+    }
+    
+    class func fromStream(stream : ScannerStream<SomeToken>) -> ObjectNode? {
+        guard let openBracket = TokenNode.fromStream(stream, type: .OpenBracket) else {
             return nil
         }
         
         var content = [ObjectEntryNode]()
-        while let objectEntry = ObjectEntryNode(stream: stream) {
+        while let objectEntry = ObjectEntryNode.fromStream(stream) {
             content.append(objectEntry)
         }
         
-        let closeBracket = TokenNode(stream: stream, type: .CloseBracket)
-        if closeBracket == nil {
-            super.init(stream: stream)
+        guard let closeBracket = TokenNode.fromStream(stream, type: .CloseBracket) else {
             return nil
         }
         
-        self.openBracket = openBracket
-        self.content = content
-        self.closeBracket = closeBracket
-        self.terminator = TokenNode(stream: stream, type: .Terminator)
+        let terminator = TokenNode.fromStream(stream, type: .Terminator)
         
-        super.init(stream: stream)
+       return ObjectNode(openBracket: openBracket,
+            content: content,
+            closeBracket: closeBracket,
+            terminator: terminator)
     }
     
     override func dump() -> String {
@@ -346,25 +354,31 @@ class ObjectNode : ParsedNode<SomeToken> {
 
 /// ObjectEntry -> Ident = ObjectValue
 class ObjectEntryNode : ParsedNode<SomeToken> {
-    var identifier : TokenNode! = nil
-    var equal : TokenNode! = nil
-    var objectValue : ObjectValueNode! = nil
-    var comma : TokenNode? = nil
+    let identifier : TokenNode
+    let equal : TokenNode
+    let objectValue : ObjectValueNode
+    let comma : TokenNode?
     
-    required init?(stream: ScannerStream<SomeToken>) {
-        guard let identifier = TokenNode(stream: stream, type: .Identifier),
-            let equal = TokenNode(stream: stream, type: .Equal),
-            let objectValue = ObjectValueNode(stream: stream) else {
-                super.init(stream: stream)
+    required init(identifier idval : TokenNode,
+        equal eval : TokenNode,
+        objectValue objval : ObjectValueNode,
+        comma commaval : TokenNode?) {
+        
+        self.identifier = idval
+        self.equal = eval
+        self.objectValue = objval
+        self.comma = commaval
+    }
+    
+    class func fromStream(stream : ScannerStream<SomeToken>) -> ObjectEntryNode? {
+        guard let identifier = TokenNode.fromStream(stream, type: .Identifier),
+            let equal = TokenNode.fromStream(stream, type: .Equal),
+            let objectValue = ObjectValueNode.fromStream(stream) else {
                 return nil
         }
         
-        self.identifier = identifier
-        self.equal = equal
-        self.objectValue = objectValue
-        self.comma = TokenNode(stream: stream, type: .Separator)
-        
-        super.init(stream: stream)
+        let comma = TokenNode.fromStream(stream, type: .Separator)
+        return ObjectEntryNode(identifier: identifier, equal: equal, objectValue: objectValue, comma: comma)
     }
     
     override func dump() -> String {
@@ -378,33 +392,37 @@ class ObjectEntryNode : ParsedNode<SomeToken> {
 
 /// ObjectValue -> (Object | Array | Ident);
 class ObjectValueNode : ParsedNode<SomeToken> {
-    var value : ParsedNode<SomeToken>! = nil
-    var terminator : TokenNode?
+    let value : ParsedNode<SomeToken>
+    let terminator : TokenNode?
     
-    required init?(stream: ScannerStream<SomeToken>) {
+    required init(value val : ParsedNode<SomeToken>, terminator termval : TokenNode?) {
+        value = val
+        terminator = termval
+    }
+    
+    class func fromStream(stream : ScannerStream<SomeToken>) -> ObjectValueNode? {
+        var value : ParsedNode<SomeToken>? = nil
         if let nextToken = stream.peekExcluding([ .Comment, .WhiteSpace ]) {
             switch nextToken.tokenType {
             case .ArrayStart:
-                value = ArrayNode(stream: stream)
+                value = ArrayNode.fromStream(stream)
             case .OpenBracket:
-                value = ObjectNode(stream: stream)
+                value = ObjectNode.fromStream(stream)
             case .Identifier:
-                value = TokenNode(stream: stream, type: .Identifier)
+                value = TokenNode.fromStream(stream, type: .Identifier)
             default:
                 break
             }
         }
         
+        var terminator : TokenNode?
         if let nextToken = stream.peekExcluding([ .Comment, .WhiteSpace ])
             where nextToken.tokenType == .Terminator || nextToken.tokenType == .Separator {
-            
-            self.terminator = TokenNode(stream: stream, type: nextToken.tokenType)
+            terminator = TokenNode.fromStream(stream, type: nextToken.tokenType)
         }
         
-        super.init(stream: stream)
-        if value == nil {
-            return nil
-        }
+        let returnVal : ObjectValueNode? = value != nil ? ObjectValueNode(value: value!, terminator: terminator) : nil
+        return returnVal
     }
     
     override func dump() -> String {
@@ -418,35 +436,41 @@ class ObjectValueNode : ParsedNode<SomeToken> {
 
 /// Array -> ( ObjectValue+ );
 class ArrayNode : ParsedNode<SomeToken> {
-    var openParen : TokenNode! = nil
-    var elements : [ObjectValueNode]! = nil
-    var closeParen : TokenNode! = nil
-    var terminator : TokenNode?
+    let openParen : TokenNode
+    let elements : [ObjectValueNode]
+    let closeParen : TokenNode
+    let terminator : TokenNode?
     
-    required init?(stream: ScannerStream<SomeToken>) {
-        let openParen = TokenNode(stream: stream, type: .ArrayStart)
-        if openParen == nil {
-            super.init(stream: stream)
+    init(openParen openval : TokenNode,
+        elements eval : [ObjectValueNode],
+        closeParen closeval : TokenNode,
+        terminator termval : TokenNode?) {
+        
+        openParen = openval
+        elements = eval
+        closeParen = closeval
+        terminator = termval
+    }
+    
+    class func fromStream(stream : ScannerStream<SomeToken>) -> ArrayNode? {
+        guard let openParen = TokenNode.fromStream(stream, type: .ArrayStart) else {
             return nil
         }
         
         var elements = [ObjectValueNode]()
-        while let element = ObjectValueNode(stream: stream) {
+        while let element = ObjectValueNode.fromStream(stream) {
             elements.append(element)
         }
         
-        let closeParen = TokenNode(stream: stream, type: .ArrayEnd)
-        if closeParen == nil {
-            super.init(stream: stream)
+        guard let closeParen = TokenNode.fromStream(stream, type: .ArrayEnd) else {
             return nil
         }
         
-        self.openParen = openParen
-        self.elements = elements
-        self.closeParen = closeParen
-        self.terminator = TokenNode(stream: stream, type: .Terminator)
-        
-        super.init(stream: stream)
+        let terminator = TokenNode.fromStream(stream, type: .Terminator)
+        return ArrayNode(openParen: openParen,
+            elements: elements,
+            closeParen: closeParen,
+            terminator: terminator)
     }
     
     override func dump() -> String {
@@ -475,7 +499,7 @@ let content = { Void -> String in
 let scanner = Scanner(tokenTypes: tokens)
 let stream = ScannerStream(content: content, scanner: scanner)
 
-let project = ObjectNode(stream: stream)
+let project = ObjectNode.fromStream(stream)
 if let dumpString = project?.dump() {
     print("\(dumpString)")
 }
