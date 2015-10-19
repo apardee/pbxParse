@@ -237,24 +237,20 @@ let tokens = [
 
 ///////////////////////////////////////////////////////////////////////////////////
 
-//// !$*UTF8*$!
-//{
-//    files = (
-//        8226E19716EFBFFA00FB6107 /* QuartzCore.framework in Frameworks */,
-//        8281D007169C7CC400C8BFF5 /* CoreImage.framework in Frameworks */,
-//        50C189C915BE3E74005EAFB7 /* CoreData.framework in Frameworks */,
-//        504F06281586E09B00812C54 /* CoreAudio.framework in Frameworks */,
-//        50F5A84A156C9209007CAC0C /* CoreMedia.framework in Frameworks */,
-//        50F5A848156C91FF007CAC0C /* AVFoundation.framework in Frameworks */,
-//        50F5A827156B268B007CAC0C /* UIKit.framework in Frameworks */,
-//        50F5A829156B268B007CAC0C /* Foundation.framework in Frameworks */,
-//        50F5A82B156B268B007CAC0C /* CoreGraphics.framework in Frameworks */,
-//        827D3C22171D8DC7000521F1 /* HockeySDK.framework in Frameworks */,
-//    );
-//}
-
 protocol ParsedNode {
+    
+    /// Dump the string representation of the structured nodes
     func dump() -> String
+}
+
+extension ParsedNode {
+    
+    /// Dump the content of all of the contained nodes.
+    func dumpWithNodes(nodes : [ParsedNode]) -> String {
+        var value = ""
+        nodes.forEach{ value += $0.dump() }
+        return value
+    }
 }
 
 // Wraps a token, also consumes comment and
@@ -338,15 +334,14 @@ class ObjectNode : ParsedNode {
     }
     
     func dump() -> String {
-        var fullValue = openBracket.dump()
-        for node in content {
-            fullValue += node.dump()
+        var nodes = [ParsedNode]()
+        nodes.append(openBracket)
+        content.forEach{ nodes.append($0) }
+        nodes.append(closeBracket)
+        if let terminator = terminator {
+            nodes.append(terminator)
         }
-        fullValue += closeBracket.dump()
-        if let terminatorValue = terminator {
-            fullValue += terminatorValue.dump()
-        }
-        return fullValue
+        return dumpWithNodes(nodes)
     }
 }
 
@@ -380,11 +375,11 @@ class ObjectEntryNode : ParsedNode {
     }
     
     func dump() -> String {
-        var fullValue = identifier.dump() + equal.dump() + objectValue.dump()
+        var nodes : [ParsedNode] = [ identifier, equal, objectValue ]
         if let comma = comma {
-            fullValue += comma.dump()
+            nodes.append(comma)
         }
-        return fullValue
+        return dumpWithNodes(nodes)
     }
 }
 
@@ -424,11 +419,11 @@ class ObjectValueNode : ParsedNode {
     }
     
     func dump() -> String {
-        var fullValue = value.dump()
+        var nodes : [ParsedNode] = [ value ]
         if let terminator = terminator {
-            fullValue += terminator.dump()
+            nodes.append(terminator)
         }
-        return fullValue
+        return dumpWithNodes(nodes)
     }
 }
 
@@ -472,15 +467,14 @@ class ArrayNode : ParsedNode {
     }
     
     func dump() -> String {
-        var fullValue = openParen.dump()
-        for node in elements {
-            fullValue += node.dump()
+        var nodes = [ParsedNode]()
+        nodes.append(openParen)
+        elements.forEach{ nodes.append($0) }
+        nodes.append(closeParen)
+        if let terminator = terminator {
+            nodes.append(terminator)
         }
-        fullValue += closeParen.dump()
-        if let terminatorValue = terminator {
-            fullValue += terminatorValue.dump()
-        }
-        return fullValue
+        return dumpWithNodes(nodes)
     }
 }
 
