@@ -34,6 +34,7 @@
 		5002AD7D1B437C6A003CC7A5 /* test2.pbxproj */ = {isa = PBXFileReference; lastKnownFileType = text.pbxproject; path = test2.pbxproj; sourceTree = "<group>"; };
 		5002AD7E1B437C6A003CC7A5 /* testProj.pbxproj */ = {isa = PBXFileReference; lastKnownFileType = text.pbxproject; path = testProj.pbxproj; sourceTree = "<group>"; };
 		505C14C01BCC8D8200AC78FF /* test3.pbxproj */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.pbxproject; path = test3.pbxproj; sourceTree = "<group>"; };
+		505C14F71BD5B5A400AC78FF /* mergeTest.pbxproj */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.pbxproject; path = mergeTest.pbxproj; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -69,6 +70,7 @@
 				505C14C01BCC8D8200AC78FF /* test3.pbxproj */,
 				5002AD7D1B437C6A003CC7A5 /* test2.pbxproj */,
 				5002AD7E1B437C6A003CC7A5 /* testProj.pbxproj */,
+				505C14F71BD5B5A400AC78FF /* mergeTest.pbxproj */,
 				5002AD761B43781C003CC7A5 /* main.swift */,
 			);
 			path = pbxParse;

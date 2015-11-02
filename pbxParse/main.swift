@@ -1,9 +1,9 @@
 import Foundation
 
 extension String {
-    func rangeFromNSRange(nsRange : NSRange) -> Range<String.Index>? {
-        let from16 = utf16.startIndex.advancedBy(nsRange.location, limit: utf16.endIndex)
-        let to16 = from16.advancedBy(nsRange.length, limit: utf16.endIndex)
+    func rangeFromNSRange(range : NSRange) -> Range<String.Index>? {
+        let from16 = utf16.startIndex.advancedBy(range.location, limit: utf16.endIndex)
+        let to16 = from16.advancedBy(range.length, limit: utf16.endIndex)
         if let from = String.Index(from16, within: self),
             let to = String.Index(to16, within: self) {
                 return from ..< to
@@ -43,7 +43,6 @@ class Scanner<T : ScannerTokenType> {
         :param: tokenTypes The full content to produce tokens. Order implies priority.
     */
     init(tokenTypes: [(T, String)]) {
-        
         self.tokenDefs = tokenTypes.map { (token) -> (T, NSRegularExpression) in
             var regex = NSRegularExpression()
             do {
@@ -56,7 +55,6 @@ class Scanner<T : ScannerTokenType> {
             catch {
                 // TODO ???
             }
-
             return (token.0, regex)
         }
     }
@@ -96,7 +94,7 @@ class Scanner<T : ScannerTokenType> {
     }
 }
 
-internal enum ScannerStreamState {
+enum ScannerStreamState {
     case Scanning(Int)
     case Finished
 }
@@ -104,10 +102,9 @@ internal enum ScannerStreamState {
 /// A stateful stream of tokens from a set of source content.
 class ScannerStream<T : ScannerTokenType> {
     
-    private var content: String
+    private let content: String
     private let scanner: Scanner<T>
-    
-    private var contentLength: Int = 0
+    private let contentLength: Int
     
     /// The current state of scanning.
     var state = ScannerStreamState.Scanning(0)
@@ -245,7 +242,7 @@ protocol ParsedNode {
 
 extension ParsedNode {
     
-    /// Dump the content of all of the contained nodes.
+    /// Recursively dump the content of all child nodes.
     func dumpWithNodes(nodes : [ParsedNode]) -> String {
         var value = ""
         nodes.forEach{ value += $0.dump() }
@@ -254,16 +251,11 @@ extension ParsedNode {
 }
 
 // Wraps a token, also consumes comment and
-class TokenNode : ParsedNode {
+struct TokenNode : ParsedNode {
     let primaryToken : ScannedToken<SomeToken>
     let allTokens : [ScannedToken<SomeToken>]
     
-    required init(primary : ScannedToken<SomeToken>, otherTokens : [ScannedToken<SomeToken>]) {
-        primaryToken = primary
-        allTokens = otherTokens
-    }
-    
-    class func fromStream(stream : ScannerStream<SomeToken>, type : SomeToken) -> TokenNode? {
+    static func fromStream(stream : ScannerStream<SomeToken>, type : SomeToken) -> TokenNode? {
         guard let next = stream.peekExcluding([ .Comment, .WhiteSpace ]) where next.tokenType == type else {
             return nil
         }
@@ -281,7 +273,7 @@ class TokenNode : ParsedNode {
         let primaryToken = stream.next()!
         otherTokens.append(primaryToken)
         
-        return TokenNode(primary: primaryToken, otherTokens: otherTokens)
+        return TokenNode(primaryToken: primaryToken, allTokens: otherTokens)
     }
     
     func dump() -> String {
@@ -294,24 +286,13 @@ class TokenNode : ParsedNode {
 }
 
 /// Object -> { ObjectEntry+ };
-class ObjectNode : ParsedNode {
+struct ObjectNode : ParsedNode {
     let openBracket : TokenNode
     let content : [ObjectEntryNode]
     let closeBracket : TokenNode
     let terminator : TokenNode?
     
-    required init(openBracket openBracketVal: TokenNode,
-        content contentVal : [ObjectEntryNode],
-        closeBracket closeBracketVal : TokenNode,
-        terminator terminatorVal : TokenNode?) {
-        
-        openBracket = openBracketVal
-        content = contentVal
-        closeBracket = closeBracketVal
-        terminator = terminatorVal
-    }
-    
-    class func fromStream(stream : ScannerStream<SomeToken>) -> ObjectNode? {
+    static func fromStream(stream : ScannerStream<SomeToken>) -> ObjectNode? {
         guard let openBracket = TokenNode.fromStream(stream, type: .OpenBracket) else {
             return nil
         }
@@ -346,24 +327,13 @@ class ObjectNode : ParsedNode {
 }
 
 /// ObjectEntry -> Ident = ObjectValue
-class ObjectEntryNode : ParsedNode {
+struct ObjectEntryNode : ParsedNode {
     let identifier : TokenNode
     let equal : TokenNode
     let objectValue : ObjectValueNode
     let comma : TokenNode?
     
-    required init(identifier idval : TokenNode,
-        equal eval : TokenNode,
-        objectValue objval : ObjectValueNode,
-        comma commaval : TokenNode?) {
-        
-        self.identifier = idval
-        self.equal = eval
-        self.objectValue = objval
-        self.comma = commaval
-    }
-    
-    class func fromStream(stream : ScannerStream<SomeToken>) -> ObjectEntryNode? {
+    static func fromStream(stream : ScannerStream<SomeToken>) -> ObjectEntryNode? {
         guard let identifier = TokenNode.fromStream(stream, type: .Identifier),
             let equal = TokenNode.fromStream(stream, type: .Equal),
             let objectValue = ObjectValueNode.fromStream(stream) else {
@@ -371,7 +341,11 @@ class ObjectEntryNode : ParsedNode {
         }
         
         let comma = TokenNode.fromStream(stream, type: .Separator)
-        return ObjectEntryNode(identifier: identifier, equal: equal, objectValue: objectValue, comma: comma)
+        
+        return ObjectEntryNode(identifier: identifier,
+            equal: equal,
+            objectValue: objectValue,
+            comma: comma)
     }
     
     func dump() -> String {
@@ -384,16 +358,11 @@ class ObjectEntryNode : ParsedNode {
 }
 
 /// ObjectValue -> (Object | Array | Ident);
-class ObjectValueNode : ParsedNode {
+struct ObjectValueNode : ParsedNode {
     let value : ParsedNode
     let terminator : TokenNode?
     
-    required init(value val : ParsedNode, terminator termval : TokenNode?) {
-        value = val
-        terminator = termval
-    }
-    
-    class func fromStream(stream : ScannerStream<SomeToken>) -> ObjectValueNode? {
+    static func fromStream(stream : ScannerStream<SomeToken>) -> ObjectValueNode? {
         var value : ParsedNode? = nil
         if let nextToken = stream.peekExcluding([ .Comment, .WhiteSpace ]) {
             switch nextToken.tokenType {
@@ -428,24 +397,13 @@ class ObjectValueNode : ParsedNode {
 }
 
 /// Array -> ( ObjectValue+ );
-class ArrayNode : ParsedNode {
+struct ArrayNode : ParsedNode {
     let openParen : TokenNode
     let elements : [ObjectValueNode]
     let closeParen : TokenNode
     let terminator : TokenNode?
     
-    init(openParen openval : TokenNode,
-        elements eval : [ObjectValueNode],
-        closeParen closeval : TokenNode,
-        terminator termval : TokenNode?) {
-        
-        openParen = openval
-        elements = eval
-        closeParen = closeval
-        terminator = termval
-    }
-    
-    class func fromStream(stream : ScannerStream<SomeToken>) -> ArrayNode? {
+    static func fromStream(stream : ScannerStream<SomeToken>) -> ArrayNode? {
         guard let openParen = TokenNode.fromStream(stream, type: .ArrayStart) else {
             return nil
         }
