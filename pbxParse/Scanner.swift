@@ -8,7 +8,7 @@
 
 import Foundation
 
-/// The base protocol for a scanned token, usually an enumerated type.
+/// The base protocol for a scanned token.
 protocol ScannerTokenType : Equatable {
     
 }
@@ -20,7 +20,7 @@ struct ScannedToken<T : ScannerTokenType> {
     let range : NSRange
 }
 
-/// A basic lexical scanner, capable of producing tokens for the initialized regular expressions.
+/// A basic lexical scanner, capable of producing tokens from a body of content.
 class Scanner<T : ScannerTokenType> {
     
     private let tokenDefs: [(T, NSRegularExpression)]
@@ -47,7 +47,7 @@ class Scanner<T : ScannerTokenType> {
     }
     
     /**
-     Produces the first available token from the content passed, at the specified range.
+     Produces the first available token from a content stream, at the specified range.
      
      :param: content The full content to produce
      

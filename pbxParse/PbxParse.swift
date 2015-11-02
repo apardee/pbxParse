@@ -8,7 +8,9 @@
 
 import Foundation
 
-/// The definition of all token types in the pbxProj grammar.
+// MARK: - Token types
+
+/// All token types in the pbxProj grammar.
 enum PbxToken : ScannerTokenType {
     case Comment
     case OpenBracket
@@ -36,6 +38,8 @@ enum PbxToken : ScannerTokenType {
         ]
     }
 }
+
+// MARK: - AST Node types
 
 /// Wraps a token, also consuming surrounding comments.
 struct TokenNode : ParsedNode {

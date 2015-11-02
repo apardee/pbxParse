@@ -24,13 +24,11 @@ class ScannerStream<T : ScannerTokenType> {
     var state = ScannerStreamState.Scanning(0)
     
     /**
-     Instantiates . a scanner stream
+     Instantiates a scanner stream
      
-     :param: content The full content to produce
+     :param: content The full content used to produce tokens sequentially.
      
-     :param: scanner The specific range of the content to scan.
-     
-     :returns: The token produced from the range passed.
+     :param: scanner Lexical scanning rules and token types.
      */
     required init(content contentsVal: String, scanner scannerVal: Scanner<T>) {
         content = contentsVal
@@ -58,7 +56,7 @@ class ScannerStream<T : ScannerTokenType> {
         return tokenOut
     }
     
-    /// Produce the next token from the stream if it matches the token type passed, nil if the token is of another type or the stream has already been exhausted.
+    /// Produce the next token from the stream if it matches the token type passed. Produces nil if the token is of another type or the stream has already been exhausted.
     func nextOfType(expected : T) -> ScannedToken<T>? {
         guard let nextToken = peek() where
             nextToken.tokenType == expected else { return nil }
