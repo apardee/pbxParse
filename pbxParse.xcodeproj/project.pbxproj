@@ -8,9 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		5002AD771B43781C003CC7A5 /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5002AD761B43781C003CC7A5 /* main.swift */; };
-		5002AD821B437D23003CC7A5 /* test2.pbxproj in CopyFiles */ = {isa = PBXBuildFile; fileRef = 5002AD7D1B437C6A003CC7A5 /* test2.pbxproj */; };
 		5002AD831B437D23003CC7A5 /* testProj.pbxproj in CopyFiles */ = {isa = PBXBuildFile; fileRef = 5002AD7E1B437C6A003CC7A5 /* testProj.pbxproj */; };
-		505C14C11BCC8DDA00AC78FF /* test3.pbxproj in CopyFiles */ = {isa = PBXBuildFile; fileRef = 505C14C01BCC8D8200AC78FF /* test3.pbxproj */; };
 		50F31E621BE6E1EF0000E07A /* Scanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50F31E611BE6E1EF0000E07A /* Scanner.swift */; };
 		50F31E641BE6E2160000E07A /* ScannerStream.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50F31E631BE6E2160000E07A /* ScannerStream.swift */; };
 		50F31E671BE6E2620000E07A /* ParsedNode.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50F31E661BE6E2620000E07A /* ParsedNode.swift */; };
@@ -24,8 +22,6 @@
 			dstPath = "";
 			dstSubfolderSpec = 16;
 			files = (
-				505C14C11BCC8DDA00AC78FF /* test3.pbxproj in CopyFiles */,
-				5002AD821B437D23003CC7A5 /* test2.pbxproj in CopyFiles */,
 				5002AD831B437D23003CC7A5 /* testProj.pbxproj in CopyFiles */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -35,10 +31,7 @@
 /* Begin PBXFileReference section */
 		5002AD731B43781C003CC7A5 /* pbxParse */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = pbxParse; sourceTree = BUILT_PRODUCTS_DIR; };
 		5002AD761B43781C003CC7A5 /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
-		5002AD7D1B437C6A003CC7A5 /* test2.pbxproj */ = {isa = PBXFileReference; lastKnownFileType = text.pbxproject; path = test2.pbxproj; sourceTree = "<group>"; };
 		5002AD7E1B437C6A003CC7A5 /* testProj.pbxproj */ = {isa = PBXFileReference; lastKnownFileType = text.pbxproject; path = testProj.pbxproj; sourceTree = "<group>"; };
-		505C14C01BCC8D8200AC78FF /* test3.pbxproj */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.pbxproject; path = test3.pbxproj; sourceTree = "<group>"; };
-		505C14F71BD5B5A400AC78FF /* mergeTest.pbxproj */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.pbxproject; path = mergeTest.pbxproj; sourceTree = "<group>"; };
 		50F31E611BE6E1EF0000E07A /* Scanner.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Scanner.swift; sourceTree = "<group>"; };
 		50F31E631BE6E2160000E07A /* ScannerStream.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ScannerStream.swift; sourceTree = "<group>"; };
 		50F31E661BE6E2620000E07A /* ParsedNode.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ParsedNode.swift; sourceTree = "<group>"; };
@@ -77,10 +70,7 @@
 			children = (
 				50F31E651BE6E22D0000E07A /* PbxParse */,
 				50F31E601BE6E1C70000E07A /* Parser */,
-				505C14C01BCC8D8200AC78FF /* test3.pbxproj */,
-				5002AD7D1B437C6A003CC7A5 /* test2.pbxproj */,
 				5002AD7E1B437C6A003CC7A5 /* testProj.pbxproj */,
-				505C14F71BD5B5A400AC78FF /* mergeTest.pbxproj */,
 				5002AD761B43781C003CC7A5 /* main.swift */,
 			);
 			path = pbxParse;
