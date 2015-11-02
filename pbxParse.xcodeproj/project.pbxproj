@@ -11,6 +11,10 @@
 		5002AD821B437D23003CC7A5 /* test2.pbxproj in CopyFiles */ = {isa = PBXBuildFile; fileRef = 5002AD7D1B437C6A003CC7A5 /* test2.pbxproj */; };
 		5002AD831B437D23003CC7A5 /* testProj.pbxproj in CopyFiles */ = {isa = PBXBuildFile; fileRef = 5002AD7E1B437C6A003CC7A5 /* testProj.pbxproj */; };
 		505C14C11BCC8DDA00AC78FF /* test3.pbxproj in CopyFiles */ = {isa = PBXBuildFile; fileRef = 505C14C01BCC8D8200AC78FF /* test3.pbxproj */; };
+		50F31E621BE6E1EF0000E07A /* Scanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50F31E611BE6E1EF0000E07A /* Scanner.swift */; };
+		50F31E641BE6E2160000E07A /* ScannerStream.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50F31E631BE6E2160000E07A /* ScannerStream.swift */; };
+		50F31E671BE6E2620000E07A /* ParsedNode.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50F31E661BE6E2620000E07A /* ParsedNode.swift */; };
+		50F31E691BE6E2A60000E07A /* PbxParse.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50F31E681BE6E2A60000E07A /* PbxParse.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -35,6 +39,10 @@
 		5002AD7E1B437C6A003CC7A5 /* testProj.pbxproj */ = {isa = PBXFileReference; lastKnownFileType = text.pbxproject; path = testProj.pbxproj; sourceTree = "<group>"; };
 		505C14C01BCC8D8200AC78FF /* test3.pbxproj */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.pbxproject; path = test3.pbxproj; sourceTree = "<group>"; };
 		505C14F71BD5B5A400AC78FF /* mergeTest.pbxproj */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.pbxproject; path = mergeTest.pbxproj; sourceTree = "<group>"; };
+		50F31E611BE6E1EF0000E07A /* Scanner.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Scanner.swift; sourceTree = "<group>"; };
+		50F31E631BE6E2160000E07A /* ScannerStream.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ScannerStream.swift; sourceTree = "<group>"; };
+		50F31E661BE6E2620000E07A /* ParsedNode.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ParsedNode.swift; sourceTree = "<group>"; };
+		50F31E681BE6E2A60000E07A /* PbxParse.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PbxParse.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -67,6 +75,8 @@
 		5002AD751B43781C003CC7A5 /* pbxParse */ = {
 			isa = PBXGroup;
 			children = (
+				50F31E651BE6E22D0000E07A /* PbxParse */,
+				50F31E601BE6E1C70000E07A /* Parser */,
 				505C14C01BCC8D8200AC78FF /* test3.pbxproj */,
 				5002AD7D1B437C6A003CC7A5 /* test2.pbxproj */,
 				5002AD7E1B437C6A003CC7A5 /* testProj.pbxproj */,
@@ -74,6 +84,24 @@
 				5002AD761B43781C003CC7A5 /* main.swift */,
 			);
 			path = pbxParse;
+			sourceTree = "<group>";
+		};
+		50F31E601BE6E1C70000E07A /* Parser */ = {
+			isa = PBXGroup;
+			children = (
+				50F31E611BE6E1EF0000E07A /* Scanner.swift */,
+				50F31E631BE6E2160000E07A /* ScannerStream.swift */,
+				50F31E661BE6E2620000E07A /* ParsedNode.swift */,
+			);
+			name = Parser;
+			sourceTree = "<group>";
+		};
+		50F31E651BE6E22D0000E07A /* PbxParse */ = {
+			isa = PBXGroup;
+			children = (
+				50F31E681BE6E2A60000E07A /* PbxParse.swift */,
+			);
+			name = PbxParse;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -132,6 +160,10 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				50F31E671BE6E2620000E07A /* ParsedNode.swift in Sources */,
+				50F31E641BE6E2160000E07A /* ScannerStream.swift in Sources */,
+				50F31E621BE6E1EF0000E07A /* Scanner.swift in Sources */,
+				50F31E691BE6E2A60000E07A /* PbxParse.swift in Sources */,
 				5002AD771B43781C003CC7A5 /* main.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
